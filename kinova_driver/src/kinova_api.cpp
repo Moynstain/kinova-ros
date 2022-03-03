@@ -8,347 +8,342 @@
 
 #include <kinova_driver/kinova_api.h>
 #include <vector>
-
+#include "KinovaAPI"
 
 namespace kinova
 {
 
-void* KinovaAPI::initCommandLayerFunction(const char* name)
-{
-    char functionName[100];
-    strcpy(functionName,name);
-    if (API_type_ == ETHERNET)
-    {
-        strcpy(functionName, "Ethernet_");
-        strcat(functionName, name);
-    }
-    void * function_pointer = dlsym(API_command_lib_,functionName);
-    assert(function_pointer != NULL);
-    return function_pointer;
-}
-
-void* KinovaAPI::initCommLayerFunction(const char* name)
-{    
-    char functionName[100];
-    strcpy(functionName,name);
-    if (API_type_ == ETHERNET)
-    {
-        strcpy(functionName, "Ethernet_Communication_");
-        strcat(functionName, name);
-    }    
-    void * function_pointer = dlsym(kinova_comm_lib_, name);
-    assert(function_pointer != NULL);
-    return function_pointer;
-}
-
-
-int KinovaAPI::initializeKinovaAPIFunctions(KinovaAPIType connection_type)
-{
-    //try USB connection
-    API_type_ = connection_type;
-
-    if (API_type_ == USB)
-    {
-        loadLibraries(KINOVA_USB_LIBRARY,KINOVA_COMM_USB_LIBRARY);
-    }
-    else
-    {
-        loadLibraries(KINOVA_ETH_LIBRARY,KINOVA_COMM_ETH_LIBRARY);
+    void* initCommandLayerFunction(const char* name){
+        char functionName[100];
+        strcpy(functionName,name);
+        if (API_type_ == ETHERNET)
+        {
+            strcpy(functionName, "Ethernet_");
+            strcat(functionName, name);
+        }
+        void * function_pointer = dlsym(API_command_lib_,functionName);
+        assert(function_pointer != NULL);
+        return function_pointer;
     }
 
-    // %Tag(general function)%
-
-    initAPI = (int (*)())initCommandLayerFunction("InitAPI");
-
-    if (API_type_ != USB){
-      initEthernetAPI = (int (*)(EthernetCommConfig &))initCommandLayerFunction("InitEthernetAPI");
+    void* initCommLayerFunction(const char* name){
+        char functionName[100];
+        strcpy(functionName,name);
+        if (API_type_ == ETHERNET)
+        {
+            strcpy(functionName, "Ethernet_Communication_");
+            strcat(functionName, name);
+        }
+        void * function_pointer = dlsym(kinova_comm_lib_, name);
+        assert(function_pointer != NULL);
+        return function_pointer;
     }
 
-    closeAPI = (int (*)())initCommandLayerFunction("CloseAPI");
 
-    startControlAPI = (int (*)())initCommandLayerFunction("StartControlAPI");
+    int initializeKinovaAPIFunctions(KinovaAPIType connection_type){
+        //try USB connection
+        API_type_ = connection_type;
 
-    stopControlAPI = (int (*)())initCommandLayerFunction("StopControlAPI");
+        if (API_type_ == USB){
+            loadLibraries(KINOVA_USB_LIBRARY,KINOVA_COMM_USB_LIBRARY);
+        }
+        else{
+            loadLibraries(KINOVA_ETH_LIBRARY,KINOVA_COMM_ETH_LIBRARY);
+        }
 
-    startForceControl = (int (*)())initCommandLayerFunction("StartForceControl");
+        // %Tag(general function)%
 
-    stopForceControl = (int (*)())initCommandLayerFunction("StopForceControl");
+        initAPI = (int (*)())initCommandLayerFunction("InitAPI");
 
-    restoreFactoryDefault = (int (*)())initCommandLayerFunction("RestoreFactoryDefault");
+        if (API_type_ != USB){
+          initEthernetAPI = (int (*)(EthernetCommConfig &))initCommandLayerFunction("InitEthernetAPI");
+        }
 
-    sendJoystickCommand = (int (*)(JoystickCommand))initCommandLayerFunction("SendJoystickCommand");
+        closeAPI = (int (*)())initCommandLayerFunction("CloseAPI");
 
-    getJoystickValue = (int (*)(JoystickCommand &))initCommandLayerFunction("GetJoystickValue");
+        startControlAPI = (int (*)())initCommandLayerFunction("StartControlAPI");
 
-    getCodeVersion = (int (*)(int[CODE_VERSION_COUNT]))initCommandLayerFunction("GetCodeVersion");
+        stopControlAPI = (int (*)())initCommandLayerFunction("StopControlAPI");
 
-    getAPIVersion = (int (*)(int[API_VERSION_COUNT]))initCommandLayerFunction("GetAPIVersion");
+        startForceControl = (int (*)())initCommandLayerFunction("StartForceControl");
 
-    //not working with Ethernet API
-    //getDeviceCount = (int (*)(int &))initCommLayerFunction("GetDeviceCount");
+        stopForceControl = (int (*)())initCommandLayerFunction("StopForceControl");
 
-    getDevices = (int (*)(KinovaDevice[MAX_KINOVA_DEVICE], int &))initCommandLayerFunction("GetDevices");
+        restoreFactoryDefault = (int (*)())initCommandLayerFunction("RestoreFactoryDefault");
 
-    setActiveDevice = (int (*)(KinovaDevice))initCommandLayerFunction("SetActiveDevice");
+        sendJoystickCommand = (int (*)(JoystickCommand))initCommandLayerFunction("SendJoystickCommand");
 
-    refresDevicesList = (int (*)())initCommandLayerFunction("RefresDevicesList");
+        getJoystickValue = (int (*)(JoystickCommand &))initCommandLayerFunction("GetJoystickValue");
 
-    getControlType = (int (*)(int &)) initCommandLayerFunction("GetControlType");
+        getCodeVersion = (int (*)(int[CODE_VERSION_COUNT]))initCommandLayerFunction("GetCodeVersion");
 
-    getClientConfigurations = (int (*)(ClientConfigurations &))initCommandLayerFunction("GetClientConfigurations");
+        getAPIVersion = (int (*)(int[API_VERSION_COUNT]))initCommandLayerFunction("GetAPIVersion");
 
-    setClientConfigurations = (int (*)( ClientConfigurations))initCommandLayerFunction("SetClientConfigurations");
+        //not working with Ethernet API
+        //getDeviceCount = (int (*)(int &))initCommLayerFunction("GetDeviceCount");
 
-    setFrameType = (int (*)(int))initCommandLayerFunction("SetFrameType");
+        getDevices = (int (*)(KinovaDevice[MAX_KINOVA_DEVICE], int &))initCommandLayerFunction("GetDevices");
 
-    startCurrentLimitation = (int (*)())initCommandLayerFunction("StartCurrentLimitation");
+        setActiveDevice = (int (*)(KinovaDevice))initCommandLayerFunction("SetActiveDevice");
 
-    stopCurrentLimitation = (int (*)())initCommandLayerFunction("StopCurrentLimitation");
+        refresDevicesList = (int (*)())initCommandLayerFunction("RefresDevicesList");
 
-    getGeneralInformations = (int (*)(GeneralInformations &))initCommandLayerFunction("GetGeneralInformations");
+        getControlType = (int (*)(int &)) initCommandLayerFunction("GetControlType");
 
-    getQuickStatus = (int (*)(QuickStatus &))initCommandLayerFunction("GetQuickStatus");
+        getClientConfigurations = (int (*)(ClientConfigurations &))initCommandLayerFunction("GetClientConfigurations");
 
-    getForcesInfo = (int (*)(ForcesInfo &))initCommandLayerFunction("GetForcesInfo");
+        setClientConfigurations = (int (*)( ClientConfigurations))initCommandLayerFunction("SetClientConfigurations");
 
-    getSensorsInfo = (int (*)(SensorsInfo &))initCommandLayerFunction("GetSensorsInfo");
+        setFrameType = (int (*)(int))initCommandLayerFunction("SetFrameType");
 
-    getGripperStatus = (int (*)(Gripper &))initCommandLayerFunction("GetGripperStatus");
+        startCurrentLimitation = (int (*)())initCommandLayerFunction("StartCurrentLimitation");
 
-    getCommandVelocity = (int (*)(float[CARTESIAN_SIZE], float[MAX_ACTUATORS]))initCommandLayerFunction("GetCommandVelocity");
+        stopCurrentLimitation = (int (*)())initCommandLayerFunction("StopCurrentLimitation");
 
-    // %EndTag(general function)%
+        getGeneralInformations = (int (*)(GeneralInformations &))initCommandLayerFunction("GetGeneralInformations");
 
+        getQuickStatus = (int (*)(QuickStatus &))initCommandLayerFunction("GetQuickStatus");
 
-    // %Tag(joint angular)%
+        getForcesInfo = (int (*)(ForcesInfo &))initCommandLayerFunction("GetForcesInfo");
 
-    setAngularControl = (int (*)())initCommandLayerFunction("SetAngularControl");
+        getSensorsInfo = (int (*)(SensorsInfo &))initCommandLayerFunction("GetSensorsInfo");
 
-    getAngularCommand = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularCommand");
+        getGripperStatus = (int (*)(Gripper &))initCommandLayerFunction("GetGripperStatus");
 
-    getAngularPosition = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularPosition");
+        getCommandVelocity = (int (*)(float[CARTESIAN_SIZE], float[MAX_ACTUATORS]))initCommandLayerFunction("GetCommandVelocity");
 
-    getAngularVelocity = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularVelocity");
+        // %EndTag(general function)%
 
-    getAngularAcceleration = (int (*)(AngularAcceleration &))initCommandLayerFunction("GetActuatorAcceleration");
 
+        // %Tag(joint angular)%
 
-    getAngularForce = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularForce");
+        setAngularControl = (int (*)())initCommandLayerFunction("SetAngularControl");
 
+        getAngularCommand = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularCommand");
 
-    getAngularCurrent = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularCurrent");
+        getAngularPosition = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularPosition");
 
-    getAngularCurrentMotor = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularCurrentMotor");
+        getAngularVelocity = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularVelocity");
 
-    getPositionCurrentActuators = (int (*)(float[POSITION_CURRENT_COUNT]))initCommandLayerFunction("GetPositionCurrentActuators");
+        getAngularAcceleration = (int (*)(AngularAcceleration &))initCommandLayerFunction("GetActuatorAcceleration");
 
-    setActuatorPID = (int (*)(unsigned int, float, float, float))initCommandLayerFunction("SetActuatorPID");
 
-    // %EndTag(joint angular)%
+        getAngularForce = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularForce");
 
 
-    // %Tag(tool cartesian)%
+        getAngularCurrent = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularCurrent");
 
-    setCartesianControl = (int (*)())initCommandLayerFunction("SetCartesianControl");
+        getAngularCurrentMotor = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularCurrentMotor");
 
-    getCartesianCommand = (int (*)(CartesianPosition &))initCommandLayerFunction("GetCartesianCommand");
+        getPositionCurrentActuators = (int (*)(float[POSITION_CURRENT_COUNT]))initCommandLayerFunction("GetPositionCurrentActuators");
 
-    getCartesianPosition = (int (*)(CartesianPosition &))initCommandLayerFunction("GetCartesianPosition");
+        setActuatorPID = (int (*)(unsigned int, float, float, float))initCommandLayerFunction("SetActuatorPID");
 
+        // %EndTag(joint angular)%
 
-    getCartesianForce = (int (*)(CartesianPosition &))initCommandLayerFunction("GetCartesianForce");
 
-    setCartesianForceMinMax = (int (*)(CartesianInfo, CartesianInfo))initCommandLayerFunction("SetCartesianForceMinMax");
+        // %Tag(tool cartesian)%
 
-    setCartesianInertiaDamping = (int (*)(CartesianInfo, CartesianInfo))initCommandLayerFunction("SetCartesianInertiaDamping");
+        setCartesianControl = (int (*)())initCommandLayerFunction("SetCartesianControl");
 
+        getCartesianCommand = (int (*)(CartesianPosition &))initCommandLayerFunction("GetCartesianCommand");
 
-    setEndEffectorOffset = (int (*)(unsigned int, float, float, float))initCommandLayerFunction("SetEndEffectorOffset");
+        getCartesianPosition = (int (*)(CartesianPosition &))initCommandLayerFunction("GetCartesianPosition");
 
-    getEndEffectorOffset = (int (*)(unsigned int&, float&, float&, float&))initCommandLayerFunction("GetEndEffectorOffset");
 
+        getCartesianForce = (int (*)(CartesianPosition &))initCommandLayerFunction("GetCartesianForce");
 
-    getActualTrajectoryInfo = (int (*)(TrajectoryPoint &))initCommandLayerFunction("GetActualTrajectoryInfo");
+        setCartesianForceMinMax = (int (*)(CartesianInfo, CartesianInfo))initCommandLayerFunction("SetCartesianForceMinMax");
 
-    getGlobalTrajectoryInfo = (int (*)(TrajectoryFIFO &))initCommandLayerFunction("GetGlobalTrajectoryInfo");
+        setCartesianInertiaDamping = (int (*)(CartesianInfo, CartesianInfo))initCommandLayerFunction("SetCartesianInertiaDamping");
 
-    sendAdvanceTrajectory = (int (*)(TrajectoryPoint))initCommandLayerFunction("SendAdvanceTrajectory");
 
-    sendBasicTrajectory = (int (*)(TrajectoryPoint))initCommandLayerFunction("SendBasicTrajectory");
+        setEndEffectorOffset = (int (*)(unsigned int, float, float, float))initCommandLayerFunction("SetEndEffectorOffset");
 
-    eraseAllTrajectories = (int (*)())initCommandLayerFunction("EraseAllTrajectories");
+        getEndEffectorOffset = (int (*)(unsigned int&, float&, float&, float&))initCommandLayerFunction("GetEndEffectorOffset");
 
-     eraseAllProtectionZones = (int (*)())initCommandLayerFunction("EraseAllProtectionZones");
 
-    getProtectionZone = (int (*)(ZoneList &))initCommandLayerFunction("GetProtectionZone");
+        getActualTrajectoryInfo = (int (*)(TrajectoryPoint &))initCommandLayerFunction("GetActualTrajectoryInfo");
 
-    setProtectionZone = (int (*)(ZoneList))initCommandLayerFunction("SetProtectionZone");
+        getGlobalTrajectoryInfo = (int (*)(TrajectoryFIFO &))initCommandLayerFunction("GetGlobalTrajectoryInfo");
 
-    StartRedundantJointNullSpaceMotion = (int (*)())initCommandLayerFunction("StartRedundantJointNullSpaceMotion");
+        sendAdvanceTrajectory = (int (*)(TrajectoryPoint))initCommandLayerFunction("SendAdvanceTrajectory");
 
-    StopRedundantJointNullSpaceMotion = (int (*)())initCommandLayerFunction("StopRedundantJointNullSpaceMotion");
+        sendBasicTrajectory = (int (*)(TrajectoryPoint))initCommandLayerFunction("SendBasicTrajectory");
 
-    ActivateCollisionAutomaticAvoidance = (int (*)(int))initCommandLayerFunction("ActivateCollisionAutomaticAvoidance");
+        eraseAllTrajectories = (int (*)())initCommandLayerFunction("EraseAllTrajectories");
 
-    //ActivateSingularityAutomaticAvoidance = (int (*)(int))initCommandLayerFunction("ActivateSingularityAutomaticAvoidance");
+         eraseAllProtectionZones = (int (*)())initCommandLayerFunction("EraseAllProtectionZones");
 
-    //ActivateAutoNullSpaceMotionCartesian = (int (*)(int))initCommandLayerFunction("ActivateAutoNullSpaceMotionCartesian");
+        getProtectionZone = (int (*)(ZoneList &))initCommandLayerFunction("GetProtectionZone");
 
-    // %EndTag(tool cartesian)%
+        setProtectionZone = (int (*)(ZoneList))initCommandLayerFunction("SetProtectionZone");
 
+        StartRedundantJointNullSpaceMotion = (int (*)())initCommandLayerFunction("StartRedundantJointNullSpaceMotion");
 
-    // %Tag(torque control)%
+        StopRedundantJointNullSpaceMotion = (int (*)())initCommandLayerFunction("StopRedundantJointNullSpaceMotion");
 
-    switchTrajectoryTorque = (int (*)(GENERALCONTROL_TYPE))initCommandLayerFunction("SwitchTrajectoryTorque");
+        ActivateCollisionAutomaticAvoidance = (int (*)(int))initCommandLayerFunction("ActivateCollisionAutomaticAvoidance");
 
-    sendAngularTorqueCommand = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SendAngularTorqueCommand");
+        //ActivateSingularityAutomaticAvoidance = (int (*)(int))initCommandLayerFunction("ActivateSingularityAutomaticAvoidance");
 
-    setTorqueZero = (int (*)(int))initCommandLayerFunction("SetTorqueZero");
+        //ActivateAutoNullSpaceMotionCartesian = (int (*)(int))initCommandLayerFunction("ActivateAutoNullSpaceMotionCartesian");
 
-    sendCartesianForceCommand = (int (*)(float[COMMAND_SIZE]))
-            initCommandLayerFunction("SendCartesianForceCommand");
+        // %EndTag(tool cartesian)%
 
 
-    // Toque parameters
-    setGravityPayload = (int (*)(float[GRAVITY_PAYLOAD_SIZE]))initCommandLayerFunction("SetGravityPayload");
+        // %Tag(torque control)%
 
-    setAngularTorqueMinMax = (int (*)(AngularInfo, AngularInfo))initCommandLayerFunction("SetAngularTorqueMinMax");
+        switchTrajectoryTorque = (int (*)(GENERALCONTROL_TYPE))initCommandLayerFunction("SwitchTrajectoryTorque");
 
-    setTorqueSafetyFactor = (int (*)(float))initCommandLayerFunction("SetTorqueSafetyFactor");
+        sendAngularTorqueCommand = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SendAngularTorqueCommand");
 
-    setGravityManualInputParam = (int (*)(float command[GRAVITY_PARAM_SIZE]))
-            initCommandLayerFunction("SetGravityManualInputParam");
+        setTorqueZero = (int (*)(int))initCommandLayerFunction("SetTorqueZero");
 
-    setGravityOptimalZParam = (int (*)(float[GRAVITY_PARAM_SIZE]))
-            initCommandLayerFunction("SetGravityOptimalZParam");
+        sendCartesianForceCommand = (int (*)(float[COMMAND_SIZE]))
+                initCommandLayerFunction("SendCartesianForceCommand");
 
-    runGravityZEstimationSequence = (int (*)(ROBOT_TYPE, double[OPTIMAL_Z_PARAM_SIZE]))
-            initCommandLayerFunction("RunGravityZEstimationSequence");
 
-    runGravityZEstimationSequence7DOF = (int (*)(ROBOT_TYPE, float[OPTIMAL_Z_PARAM_SIZE_7DOF]))
-            initCommandLayerFunction("RunGravityZEstimationSequence7DOF");
+        // Toque parameters
+        setGravityPayload = (int (*)(float[GRAVITY_PAYLOAD_SIZE]))initCommandLayerFunction("SetGravityPayload");
 
-    // %EndTag(torque control)%
+        setAngularTorqueMinMax = (int (*)(AngularInfo, AngularInfo))initCommandLayerFunction("SetAngularTorqueMinMax");
 
+        setTorqueSafetyFactor = (int (*)(float))initCommandLayerFunction("SetTorqueSafetyFactor");
 
-    // %Tag(pre-defined)%
+        setGravityManualInputParam = (int (*)(float command[GRAVITY_PARAM_SIZE]))
+                initCommandLayerFunction("SetGravityManualInputParam");
 
-    moveHome = (int (*)())initCommandLayerFunction("MoveHome");
+        setGravityOptimalZParam = (int (*)(float[GRAVITY_PARAM_SIZE]))
+                initCommandLayerFunction("SetGravityOptimalZParam");
 
-    initFingers = (int (*)())initCommandLayerFunction("InitFingers");
+        runGravityZEstimationSequence = (int (*)(ROBOT_TYPE, double[OPTIMAL_Z_PARAM_SIZE]))
+                initCommandLayerFunction("RunGravityZEstimationSequence");
 
-    // %EndTag(pre-defined)%
+        runGravityZEstimationSequence7DOF = (int (*)(ROBOT_TYPE, float[OPTIMAL_Z_PARAM_SIZE_7DOF]))
+                initCommandLayerFunction("RunGravityZEstimationSequence7DOF");
 
+        // %EndTag(torque control)%
 
 
+        // %Tag(pre-defined)%
 
-    // The following APIs are not wrapped in kinova_comm, users should call kinova_api with extra caution.
+        moveHome = (int (*)())initCommandLayerFunction("MoveHome");
 
+        initFingers = (int (*)())initCommandLayerFunction("InitFingers");
 
-    // %Tag(less interest in ROS)%
+        // %EndTag(pre-defined)%
 
-    setControlMapping = (int (*)(ControlMappingCharts)) initCommandLayerFunction("SetControlMapping");
 
-    getControlMapping = (int (*)(ControlMappingCharts &)) initCommandLayerFunction("GetControlMapping");
 
-    // %EndTag(less interest in ROS)%
 
+        // The following APIs are not wrapped in kinova_comm, users should call kinova_api with extra caution.
 
 
-    // %Tag(not function, place holder, etc)%
+        // %Tag(less interest in ROS)%
 
-    getSingularityVector = (int (*)(SingularityVector &))initCommandLayerFunction("SendCartesianForceCommand"); // old style, not constantly set to zeros
+        setControlMapping = (int (*)(ControlMappingCharts)) initCommandLayerFunction("SetControlMapping");
 
-    setActuatorMaxVelocity = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetActuatorMaxVelocity"); // no corresponding DSP code.
+        getControlMapping = (int (*)(ControlMappingCharts &)) initCommandLayerFunction("GetControlMapping");
 
+        // %EndTag(less interest in ROS)%
 
-    // %EndTag(not function, place holder, etc)%
 
 
+        // %Tag(not function, place holder, etc)%
 
+        getSingularityVector = (int (*)(SingularityVector &))initCommandLayerFunction("SendCartesianForceCommand"); // old style, not constantly set to zeros
 
+        setActuatorMaxVelocity = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetActuatorMaxVelocity"); // no corresponding DSP code.
 
-    // %Tag(experimental)%
-    // force/torque control are not tested in ROS and may lead to unexpect motion.
-    // do not use these functions unless you are know exactly what you are doing.
 
-    setTorqueControlType = (int (*)(TORQUECONTROL_TYPE))initCommandLayerFunction("SetTorqueControlType");
+        // %EndTag(not function, place holder, etc)%
 
-    setActuatorPIDFilter = (int (*)(int, float, float, float))initCommandLayerFunction("SetActuatorPIDFilter");
 
-    setAngularInertiaDamping = (int (*)(AngularInfo, AngularInfo))initCommandLayerFunction("SetAngularInertiaDamping");
 
-    getAngularForceGravityFree = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularForceGravityFree");
 
-    setTorqueActuatorGain = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueActuatorGain");
 
-    setTorqueActuatorDamping = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueActuatorDamping");
+        // %Tag(experimental)%
+        // force/torque control are not tested in ROS and may lead to unexpect motion.
+        // do not use these functions unless you are know exactly what you are doing.
 
-    setTorqueCommandMax = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueCommandMax");    
+        setTorqueControlType = (int (*)(TORQUECONTROL_TYPE))initCommandLayerFunction("SetTorqueControlType");
 
-    setTorqueRateLimiter = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueRateLimiter");
+        setActuatorPIDFilter = (int (*)(int, float, float, float))initCommandLayerFunction("SetActuatorPIDFilter");
 
-    setTorqueFeedCurrent = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFeedCurrent");
+        setAngularInertiaDamping = (int (*)(AngularInfo, AngularInfo))initCommandLayerFunction("SetAngularInertiaDamping");
 
-    setTorqueFeedVelocity = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFeedVelocity");
+        getAngularForceGravityFree = (int (*)(AngularPosition &))initCommandLayerFunction("GetAngularForceGravityFree");
 
-    setTorquePositionLimitDampingGain = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorquePositionLimitDampingGain");
+        setTorqueActuatorGain = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueActuatorGain");
 
-    setTorquePositionLimitDampingMax = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorquePositionLimitDampingMax");
+        setTorqueActuatorDamping = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueActuatorDamping");
 
-    setTorquePositionLimitRepulsGain = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorquePositionLimitRepulsGain");
+        setTorqueCommandMax = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueCommandMax");
 
-    setTorquePositionLimitRepulsMax = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorquePositionLimitRepulsMax");
+        setTorqueRateLimiter = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueRateLimiter");
 
-    setTorqueFilterVelocity = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFilterVelocity");
+        setTorqueFeedCurrent = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFeedCurrent");
 
+        setTorqueFeedVelocity = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFeedVelocity");
 
-    setTorqueFilterMeasuredTorque = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFilterMeasuredTorque");
+        setTorquePositionLimitDampingGain = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorquePositionLimitDampingGain");
 
-    setTorqueFilterError = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFilterError");
+        setTorquePositionLimitDampingMax = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorquePositionLimitDampingMax");
 
-    setTorqueFilterControlEffort = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFilterControlEffort");
+        setTorquePositionLimitRepulsGain = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorquePositionLimitRepulsGain");
 
-    setGravityType = (int (*)(GRAVITY_TYPE))initCommandLayerFunction("SetGravityType");
+        setTorquePositionLimitRepulsMax = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorquePositionLimitRepulsMax");
 
-    setGravityVector = (int (*)(float[GRAVITY_VECTOR_SIZE]))initCommandLayerFunction("SetGravityVector");    
+        setTorqueFilterVelocity = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFilterVelocity");
 
-    getAngularTorqueCommand = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("GetAngularTorqueCommand");
 
-    getAngularTorqueGravityEstimation = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("GetAngularTorqueGravityEstimation");
+        setTorqueFilterMeasuredTorque = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFilterMeasuredTorque");
 
-    setSwitchThreshold = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetSwitchThreshold");
+        setTorqueFilterError = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFilterError");
 
-    setPositionLimitDistance = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetPositionLimitDistance");   
+        setTorqueFilterControlEffort = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetTorqueFilterControlEffort");
 
-    setTorqueVibrationController = (int (*)(float))initCommandLayerFunction("SetTorqueVibrationController");
+        setGravityType = (int (*)(GRAVITY_TYPE))initCommandLayerFunction("SetGravityType");
 
-    setTorqueRobotProtection = (int (*)(int))initCommandLayerFunction("SetTorqueRobotProtection");    
+        setGravityVector = (int (*)(float[GRAVITY_VECTOR_SIZE]))initCommandLayerFunction("SetGravityVector");
 
-    getTrajectoryTorqueMode = (int (*)(int &))initCommandLayerFunction("GetTrajectoryTorqueMode");
+        getAngularTorqueCommand = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("GetAngularTorqueCommand");
 
-    setTorqueInactivityType = (int (*)(int))initCommandLayerFunction("SetTorqueInactivityType");
+        getAngularTorqueGravityEstimation = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("GetAngularTorqueGravityEstimation");
 
-        // %EndTag(experimental)%
-}
+        setSwitchThreshold = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetSwitchThreshold");
 
-//returns 1 if robot connection sucessful
-int KinovaAPI::loadLibraries(const char *command_lib, const char *comm_lib)
-{
-    API_command_lib_  = dlopen(command_lib,  RTLD_NOW | RTLD_GLOBAL);
-    if (API_command_lib_ == NULL)
+        setPositionLimitDistance = (int (*)(float[COMMAND_SIZE]))initCommandLayerFunction("SetPositionLimitDistance");
+
+        setTorqueVibrationController = (int (*)(float))initCommandLayerFunction("SetTorqueVibrationController");
+
+        setTorqueRobotProtection = (int (*)(int))initCommandLayerFunction("SetTorqueRobotProtection");
+
+        getTrajectoryTorqueMode = (int (*)(int &))initCommandLayerFunction("GetTrajectoryTorqueMode");
+
+        setTorqueInactivityType = (int (*)(int))initCommandLayerFunction("SetTorqueInactivityType");
+
+            // %EndTag(experimental)%
+    }
+
+    //returns 1 if robot connection sucessful
+    int KinovaAPI::loadLibraries(const char *command_lib, const char *comm_lib)
     {
-        ROS_FATAL("%s", dlerror());
-        return 0;
+        API_command_lib_  = dlopen(command_lib,  RTLD_NOW | RTLD_GLOBAL);
+        if (API_command_lib_ == NULL)
+        {
+            ROS_FATAL("%s", dlerror());
+            return 0;
+        }
+        kinova_comm_lib_ = dlopen(comm_lib, RTLD_NOW | RTLD_GLOBAL);
+        if (kinova_comm_lib_ == NULL)
+        {
+            ROS_FATAL("%s", dlerror());
+            return 0;
+        }
+        return 1;
     }
-    kinova_comm_lib_ = dlopen(comm_lib, RTLD_NOW | RTLD_GLOBAL);
-    if (kinova_comm_lib_ == NULL)
-    {
-        ROS_FATAL("%s", dlerror());
-        return 0;
-    }
-    return 1;
-}
 
 }  // namespace kinova
 
